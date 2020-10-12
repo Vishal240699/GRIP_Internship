@@ -1,0 +1,111 @@
+---
+title: "TASK 1"
+author: "Vishal Kumar"
+date: "11/10/2020"
+output: html_document
+---
+
+### Importing the required libraries
+
+```{r}
+library(psych)
+library(stats)
+library(ggplot2)
+library(Metrics)
+```
+
+
+### Importing the dataset
+```{r}
+timeTable <- read.csv("/home/vishal/GRIP/task1/student_scores - student_scores.csv")
+str(timeTable)
+```
+```{r}
+summary(timeTable)
+```
+
+```{r}
+hist(timeTable$Hours)
+```
+From the bove histogram we could see, most of the people studied an average of 3 hours,
+
+```{r}
+f <- ggplot(timeTable, aes(Hours, Scores))
+f + geom_jitter(size = 2) + ggtitle("Hours vs Percentage")
+f + geom_smooth(size = 2)
+```
+
+
+```{r}
+cor(timeTable[c("Hours", "Scores")])
+pairs(timeTable[c("Hours", "Scores")])
+pairs.panels(timeTable[c("Hours", "Scores")])
+```
+
+The oval-shaped object on each scatter plot is a correlation ellipse.
+It provides a visualization of correlation strength. The more the
+ellipse is stretched, the stronger the correlation.
+
+
+### Training the model
+
+```{r}
+model <- lm(Scores ~ Hours, data = timeTable)
+model
+```
+
+```{r}
+summary(model)
+```
+
+
+```{r}
+plot(timeTable$Hours, timeTable$Scores)
+#abline(2.484, 9.776)
+abline(lm(timeTable$Scores ~ timeTable$Hours))
+```
+
+### Predicting the score for Hour = 9.25
+```{r}
+predict_ans <- predict(model, data.frame(Hours = 9.25, Scores = ""))
+print(predict_ans)
+```
+### Evaluating MODEL 1
+We use Mean Absolute Error
+```{r}
+#pred <- predict(model, timeTable$Hours)
+timeTable$Predicted <- predict(model, timeTable)
+mae(timeTable$Scores, timeTable$Predicted)
+```
+
+## Refining The model
+
+```{r}
+timeTable$Hours2 <- timeTable$Hours^2
+```
+
+
+```{r}
+model2 <- lm(Scores ~ Hours + Hours2, timeTable)
+summary(model2)
+```
+
+### Predicting the score for Hour = 9.25
+```{r}
+predict_ans2 <- predict(model2, data.frame(Hours = 9.25, Hours2 = 9.25^2, Scores = ""))
+predict_ans2
+```
+
+```{r}
+plot(timeTable$Hours, timeTable$Scores)
+#abline(2.484, 9.776)
+abline(lm(timeTable$Scores ~ timeTable$Hours+timeTable$Hours2))
+```
+
+### Evaluating MODEL 2
+We use Mean Absolute Error
+```{r}
+timeTable$Predicted2 <- predict(model2, timeTable)
+mae(timeTable$Scores, timeTable$Predicted2)
+```
+
