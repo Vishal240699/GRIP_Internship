@@ -42,6 +42,7 @@ myclusters
 ```{r}
 fviz_cluster(myclusters, data = iris[,-5], geom = "point")
 ```
+
 ### Using ggpubr package to get better view of the plot
 ```{r}
 res.pca <- prcomp(iris[,-5],  scale = TRUE)
