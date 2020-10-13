@@ -1,0 +1,66 @@
+---
+title: "Task 2"
+author: "Vishal Kumar"
+date: "13/10/2020"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+ 
+### Importing the required libraries
+#### (No need to import iris dataset as it is already present in R package)
+#### Also removing duplicated datas (if any).
+```{r}
+library(stats)
+library(ggpubr)
+library(factoextra) # clustering algorithms & visualization
+
+dSet <- iris
+dSet <- dSet[!duplicated(dSet),]
+summary(dSet)
+str(dSet)
+```
+
+### Preparing the data by removing the  SPECIES coloumn
+#### # Plotting the results onto a line graph, allowing us to observe 'The elbow'
+```{r}
+dSet <- dSet[-5]
+set.seed(100)
+fviz_nbclust(dSet, kmeans, method = "wss")
+```
+
+### Applying kmeans clustering algorithm
+```{r}
+
+myclusters <- kmeans(iris[,-5], 3)
+myclusters
+```
+
+### Plotting the cluster plot
+```{r}
+fviz_cluster(myclusters, data = iris[,-5], geom = "point")
+```
+### Using ggpubr package to get better view of the plot
+```{r}
+res.pca <- prcomp(iris[,-5],  scale = TRUE)
+ind.coord <- as.data.frame(get_pca_ind(res.pca)$coord)
+ind.coord$cluster <- factor(myclusters$cluster)
+ind.coord$Species <- iris$Species
+head(ind.coord)
+
+eigenvalue <- round(get_eigenvalue(res.pca), 1)
+variance.percent <- eigenvalue$variance.percent
+head(eigenvalue)
+
+ggscatter(
+  ind.coord, x = "Dim.1", y = "Dim.2", 
+  color = "cluster", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
+  shape = "Species", size = 1.5,  legend = "right", ggtheme = theme_bw(),
+  xlab = paste0("Dim 1 (", variance.percent[1], "% )" ),
+  ylab = paste0("Dim 2 (", variance.percent[2], "% )" )
+) +
+  stat_mean(aes(color = cluster), size = 4)
+```
+
