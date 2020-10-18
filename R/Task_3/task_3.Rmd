@@ -78,8 +78,7 @@ M = TRUE))
 m2
 summary(m2)
 table(iris$Species, predict(m2))
-abc <- plot(as.party.Weka_tree(m2))
-abc
+plot(as.party.Weka_tree(m2))
 ```
 
 
