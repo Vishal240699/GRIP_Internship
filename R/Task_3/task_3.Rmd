@@ -1,0 +1,99 @@
+---
+title: "Task3 - Prediction using Decision Trees"
+author: "Vishal Kumar"
+date: "10/18/2020"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Importing required libraries and dataset
+We cannot import OneR and RWeka packages continously as 
+OneR function in OneR package will masked by RWeka.
+```{r}
+library(OneR)
+#library(RWeka)
+library(rpart)
+library(rpart.plot)
+df <- iris
+```
+
+### Analyzing and checking our data
+```{r}
+head(df)
+str(df)
+```
+
+### Using our first decision tree algorithm from OneR package
+OneR algorithm takes into account only ONE most feature for RULE generation
+
+```{r}
+iris_1R <- OneR(Species ~ ., data = df)
+iris_1R
+```
+
+We see the OneR algorithm has an accuracy of 94%
+
+### Comparing our predicted values with Actual values with help of confusion matrix and exploring our model with graph
+```{r}
+iris_1R_pred <- predict(iris_1R, df)
+table(actual = df$Species, predicted = iris_1R_pred)
+plot(iris_1R)
+```
+
+### Improving performance with more robust models
+### We now load our RWeka package and use the "JRip" algorithm
+```{r}
+library(RWeka)
+iris_classifier <- JRip(Species ~ ., data = df)
+iris_classifier
+summary(iris_classifier)
+```
+
+### As we can now see We have an accuracy of 97%
+
+
+
+### Using one more model from RWeka package to see if we can improve the performance
+```{r, fig.width=20, fig.height=12}
+library(RWeka)
+library(partykit)
+m1 <- J48(Species~. , data = df)
+m1
+plot(m1)
+
+```
+
+
+### CostSensitive Classifier
+```{r}
+m2 <- CostSensitiveClassifier(Species ~ ., data = df, 
+control = Weka_control(`cost-matrix` = matrix(c(0,10, 0, 0, 0, 0, 0, 10, 0), 
+ncol = 3), 
+W = "weka.classifiers.trees.J48", 
+M = TRUE))
+
+m2
+summary(m2)
+table(iris$Species, predict(m2))
+abc <- plot(as.party.Weka_tree(m2))
+abc
+```
+
+
+### The task is complete but explored more libraries for better results and easier implementation
+### The rpart library provides the easiest way to make a decision tree.
+```{r}
+tree <- rpart(Species ~ ., data = df, cp=.02)
+summary(tree)
+rpart.plot(tree, type=1, extra=1)
+rpart.plot(tree, main="extra = 3,  under = TRUE", extra=3, under=TRUE, faclen=0)
+```
+
+## To sum up all the graphs and rules
+```{r}
+prp(tree)
+```
+
